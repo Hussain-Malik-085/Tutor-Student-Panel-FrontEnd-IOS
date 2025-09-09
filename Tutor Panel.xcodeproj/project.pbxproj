@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B8706B172E70326A0029F18A /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = B8706B162E7032640029F18A /* .gitignore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		B807337B2E58553E00B3551C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		B807336D2E58553D00B3551C /* Tutor Panel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tutor Panel.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B807337A2E58553E00B3551C /* Tutor PanelTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tutor PanelTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B80733842E58553F00B3551C /* Tutor PanelUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tutor PanelUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B8706B162E7032640029F18A /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -80,6 +85,7 @@
 		B80733642E58553D00B3551C = {
 			isa = PBXGroup;
 			children = (
+				B8706B162E7032640029F18A /* .gitignore */,
 				B807336F2E58553D00B3551C /* Tutor Panel */,
 				B807337D2E58553E00B3551C /* Tutor PanelTests */,
 				B80733872E58553F00B3551C /* Tutor PanelUITests */,
@@ -222,6 +228,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B8706B172E70326A0029F18A /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
