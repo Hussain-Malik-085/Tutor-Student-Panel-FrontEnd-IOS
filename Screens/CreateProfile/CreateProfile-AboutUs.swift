@@ -1,331 +1,284 @@
-//
-//  Aboutus.swift
-//  Tutor Panel
-//
-//  Created by MetaDots on 25/08/2025.
-//
 import SwiftUI
 
 struct CreateProfileAboutUS: View {
-    @Environment(\.dismiss) var dismiss   // back action ke liye
-    @State private var selectedRole: String? = nil
+    @Environment(\.dismiss) var dismiss
+    
     @State private var username: String = ""
     @State private var email: String = ""
     @State private var showError: Bool = false
     @State private var phonenumber: String = ""
     @State private var experience: String = ""
     @State private var country: String = "Pakistan"
-    
     @State private var location: String = ""
     @State private var language: String = ""
     @State private var subject: String = ""
-    @State private var currentPhase: String = "About Us  >"   // default phase
+    @State private var currentPhase: String = "About Us  >"
     
     let items = [
-        "About Us  >",
-        "Photo  >",
-        "Certification  >",
-        "Education  >",
-        "Skills  >",
-        "Description  >",
-        "Availability  >",
-        "ID Card Verification "
+        "About Us  >", "Photo  >", "Certification  >", "Education  >",
+        "Skills  >", "Description  >", "Availability  >", "ID Card Verification "
     ]
     
-    let countries: [String] = Locale.Region.isoRegions.compactMap { region in
-        Locale.current.localizedString(forRegionCode: region.identifier)
-    }.sorted()
-
+    var countries: [String] {
+        Locale.Region.isoRegions.compactMap { region in
+            Locale.current.localizedString(forRegionCode: region.identifier)
+        }.sorted()
+    }
+    
     var body: some View {
         NavigationStack {
             VStack {
+                // Back Button
                 HStack {
-                    Button(action: {
-                        dismiss()  // is se pichli screen pe wapis chale jao
-                    }) {
+                    Button(action: { dismiss() }) {
                         HStack {
                             Image(systemName: "chevron.left")
-                                .foregroundColor(.black)
                             Text("Create Your Profile")
-                                .foregroundColor(.black)
                         }
                     }
                     Spacer()
                 }
+                .padding(.bottom, 10)
                 
-                // 👇 ye onAppear lagao
-                       .onAppear {
-                           if let savedUsername = UserDefaults.standard.string(forKey: "Username") {
-                               username = savedUsername
-                           }
-                           if let savedEmail = UserDefaults.standard.string(forKey: "Email") {
-                               email = savedEmail
-                           }
-                       }
-                
+                // Horizontal Phase Scroll
                 ScrollView(.horizontal, showsIndicators: false) {
-                           HStack {
-                               ForEach(items, id: \.self) { item in
-                                   Text(item)
-                                       .font(.caption)
-                                       .foregroundColor(item == currentPhase ? .red : .black) // 🔴 current wala red
-                                       .fontWeight(item == currentPhase ? .bold : .regular) // current ko bold bhi kar diya
-                                       
-                               }
-                           }
-                       }
-                    
-                    Text("About Us")
-                        .font(.headline)
-                    
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.bottom,2)
-                    
-                ScrollView {
-                    HStack(spacing: 4) {   
-                        Text("User Name")
-                            .font(.system(size: 12))
-                            .fontWeight(.medium)
-                        
-                        Text("(User Name Can't be changed)")
-                            .font(.system(size: 10))
-                            .foregroundColor(.red)
-                            .italic()
-                            .fontWeight(.medium)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-
-                    
-                    TextField("E.g. Steve Smith", text: $username)
-                        .padding(13)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(10)
-                        .padding(.vertical,2)
-                    
-                    
-                    
-                    HStack(spacing: 4) {
-                        Text("Email Address")
-                            .font(.system(size: 12))
-                            .fontWeight(.medium)
-                        
-                        Text("(Email Can't be changed)")
-                            .font(.system(size: 10))
-                            .foregroundColor(.red)
-                            .italic()
-                            .fontWeight(.medium)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    
-                    TextField("Enter your Email Address", text: $email)
-                        .padding(13)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(10)
-                        .padding(.vertical,2)
-                        .onChange(of: email) { _, newValue in
-                                            // check if email contains "@"
-                                            if newValue.contains("@") {
-                                                showError = false
-                                            } else {
-                                                showError = true
-                                            }
-                                        }
-                                    
-                                    if showError && !email.isEmpty {
-                                        Text("⚠️ Email must contain @ symbol")
-                                            .foregroundColor(.red)
-                                            .font(.caption)
-                                    }
-                    
-                    
-                    Text("Phone Number")
-                                   .font(.system(size: 12))
-                                   .fontWeight(.medium)
-                                   .frame(maxWidth: .infinity, alignment: .leading)
-                               
-                    TextField("E.g. 03056789888", text: $phonenumber)
-                        .keyboardType(.numberPad)
-                        .padding(13)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(10)
-                        .padding(.vertical,2)
-                        .onChange(of: phonenumber) { _, newValue in
-                            // Sirf digits allow karo
-                            let filtered = newValue.filter { $0.isNumber }
-                            // Max 11 digits tak hi rakho
-                            if filtered.count > 11 {
-                                phonenumber = String(filtered.prefix(11))
-                            } else {
-                                phonenumber = filtered
-                            }
+                    HStack {
+                        ForEach(items, id: \.self) { item in
+                            Text(item)
+                                .font(.caption)
+                                .foregroundColor(item == currentPhase ? .red : .black)
+                                .fontWeight(item == currentPhase ? .bold : .regular)
                         }
-                           
-                    Text("Experience")
-                        .font(.system(size: 12))
-                        .fontWeight(.medium)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    
-                    TextField("E.g. 5 Years", text: $experience)
-                        .padding(13)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(10)
-                        .padding(.vertical,2)
-                    
-                    
-                    
-                    // Country label (as-is)
-                    Text("Country")
-                        .font(.system(size: 12))
-                        .fontWeight(.medium)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                    // Countries list (iOS 16+ safe)
-                    let countries = Locale.Region.isoRegions.compactMap { region in
-                        Locale.current.localizedString(forRegionCode: region.identifier)
-                    }.sorted()
-
-                    // TextField with trailing picker (overlay)
-                    TextField("E.g. Pakistan", text: $country)
-                        .padding(13)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(10)
-                        // optional: right padding taake text icon ke neeche na aaye
-                        .padding(.trailing, 28)
-                        .overlay(alignment: .trailing) {
-                            Menu {
-                                ForEach(countries, id: \.self) { name in
-                                    Button(name) { country = name }
-                                }
-                            } label: {
-                                Image(systemName: "chevron.down")
-                                    .foregroundColor(.gray)
-                                    .padding(.trailing, 8)
-                            }
-                        }
-                        .padding(.vertical, 2)
-
-                    
-                    
-                    
-                    Text("Location")
-                        .font(.system(size: 12))
-                        .fontWeight(.medium)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    
-                    TextField("E.g. Model town lahore", text: $location)
-                        .padding(13)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(10)
-                        .padding(.vertical,2)
-                    
-                    Text("Language Spoken")
-                        .font(.system(size: 12))
-                        .fontWeight(.medium)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    
-                    TextField("E.g. English", text: $language)
-                        .padding(13)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(10)
-                        .padding(.vertical,2)
-                    
-                    Text("Subject Taught")
-                        .font(.system(size: 12))
-                        .fontWeight(.medium)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    
-                    TextField("E.g. Model town lahore", text: $subject)
-                        .padding(13)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(10)
-                        .padding(.vertical,2)
-                    
-                    Spacer()
-                    
-                    NavigationLink(destination: CreateProfilePicture()) {
-                        Text("Next")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding(13)
-                            .frame(maxWidth: .infinity)
-                            .background(Color(red: 12/255, green: 144/255, blue: 121/255))
-                            .cornerRadius(10)
-                            .padding(.vertical)
                     }
-                    .simultaneousGesture(TapGesture().onEnded {
-                        sendProfileData()
-                    })
-                    
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 
+                Text("About Us")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 4)
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 10) {
+                        // Username
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("User Name (Can't be changed)")
+                                .font(.system(size: 12))
+                                .foregroundColor(.red)
+                            TextField("E.g. Steve Smith", text: $username)
+                                .padding(13)
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(10)
+                                .disabled(true) // username can't be changed
+                        }
+                        
+                        // Email
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Email (Can't be changed)")
+                                .font(.system(size: 12))
+                                .foregroundColor(.red)
+                            TextField("Enter your Email Address", text: $email)
+                                .padding(13)
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(10)
+                                .disabled(true)
+                        }
+                        
+                        // Phone
+                        TextField("Phone Number", text: $phonenumber)
+                            .keyboardType(.numberPad)
+                            .padding(13)
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(10)
+                            .onChange(of: phonenumber) { _, newValue in
+                                let filtered = newValue.filter { $0.isNumber }
+                                phonenumber = String(filtered.prefix(11))
+                            }
+                        
+                        // Experience
+                        TextField("Experience", text: $experience)
+                            .padding(13)
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(10)
+                        
+                        // Country
+                        TextField("Country", text: $country)
+                            .padding(13)
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(10)
+                            .overlay(alignment: .trailing) {
+                                Menu {
+                                    ForEach(countries, id: \.self) { name in
+                                        Button(name) { country = name }
+                                    }
+                                } label: {
+                                    Image(systemName: "chevron.down")
+                                        .padding(.trailing, 8)
+                                }
+                            }
+                        
+                        // Location
+                        TextField("Location", text: $location)
+                            .padding(13)
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(10)
+                        
+                        // Language
+                        TextField("Language", text: $language)
+                            .padding(13)
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(10)
+                        
+                        // Subject
+                        TextField("Subject", text: $subject)
+                            .padding(13)
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(10)
+                        
+                        Spacer()
+                        
+                        // Next Button
+                        NavigationLink(destination: CreateProfilePicture()) {
+                            Text("Next")
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color(red: 12/255, green: 144/255, blue: 121/255))
+                                .cornerRadius(10)
+                        }
+                        .simultaneousGesture(TapGesture().onEnded { sendProfileData() })
+                        
+                    }
+                    .padding(.bottom, 20)
+                }
             }
-                
-                .padding()
-                
-                .navigationBarHidden(true)
-                
+            .padding()
+            .navigationBarHidden(true)
+            .onAppear {
+                loadSavedUserData()
+                fetchProfileData()
             }
+        }
     }
     
+    // MARK: - Load saved username/email
+    func loadSavedUserData() {
+        if let savedUsername = UserDefaults.standard.string(forKey: "Username") { username = savedUsername }
+        if let savedEmail = UserDefaults.standard.string(forKey: "Email") { email = savedEmail }
+    }
+    
+    // MARK: - Fetch Profile
+    func fetchProfileData() {
+        guard let url = URL(string: "http://localhost:8020/app/GetProfile") else { return }
+        guard let token = UserDefaults.standard.string(forKey: "authToken") else { return }
+        
+        print("📱 Fetching profile with token: \(token)")
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ Error fetching profile: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let data = data else {
+                print("❌ No data received from server")
+                return
+            }
+            
+            // Debug raw response
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("📱 Raw profile response: \(responseString)")
+            }
+            
+            // Parse JSON
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                print("📱 Parsed JSON from backend:", json)
+                
+                // Check if we have data field in response
+                let profileData = json["data"] as? [String: Any] ?? json
+                print("📱 Profile data to process:", profileData)
+                
+                DispatchQueue.main.async {
+                    // Update fields with proper handling
+                    let newPhone = profileData["Phone"] as? String ?? ""
+                    let newExperience = profileData["Experience"] as? String ?? ""
+                    let newCountry = profileData["Country"] as? String ?? "Pakistan"
+                    let newLocation = profileData["Location"] as? String ?? ""
+                    
+                    // Handle Language array - get first non-empty value
+                    var newLanguage = ""
+                    if let languageArray = profileData["Language"] as? [String] {
+                        newLanguage = languageArray.first(where: { !$0.isEmpty }) ?? ""
+                    }
+                    
+                    // Handle Subject array - get first non-empty value
+                    var newSubject = ""
+                    if let subjectArray = profileData["Subject"] as? [String] {
+                        newSubject = subjectArray.first(where: { !$0.isEmpty }) ?? ""
+                    }
+                    
+                    // Update state variables
+                    phonenumber = newPhone
+                    experience = newExperience
+                    country = newCountry
+                    location = newLocation
+                    language = newLanguage
+                    subject = newSubject
+                    
+                    print("📱 Updated UI fields:")
+                    print("Phone: '\(phonenumber)'")
+                    print("Experience: '\(experience)'")
+                    print("Country: '\(country)'")
+                    print("Location: '\(location)'")
+                    print("Language: '\(language)'")
+                    print("Subject: '\(subject)'")
+                }
+            } else {
+                print("❌ Failed to parse JSON response")
+            }
+        }.resume()
+    }
+    
+    // MARK: - Send Profile Data
     func sendProfileData() {
         guard let url = URL(string: "http://localhost:8020/app/CreateProfileAboutUs") else { return }
+        guard let token = UserDefaults.standard.string(forKey: "authToken") else { return }
         
-        // jo values tum state me rakhe ho unko JSON me bhejna hoga
         let body: [String: Any] = [
             "Phone": phonenumber,
             "Experience": experience,
             "Country": country,
             "Location": location,
-            "Language": [language], // array bhejna hai
-            "Subject": [subject]    // array bhejna hai
+            "Language": [language].filter { !$0.isEmpty }, // Empty strings remove karo
+            "Subject": [subject].filter { !$0.isEmpty }    // Empty strings remove karo
         ]
         
-        // JWT token storage (login ke baad secure store me save karna hoga)
-        guard let token = UserDefaults.standard.string(forKey: "authToken") else { return }
+        print("📱 Sending profile data:", body)
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") // ✅ yahan token bhejna
-
-        
-        // body ko JSON me convert karo
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        URLSession.shared.dataTask(with: request) { data, _, error in
             if let error = error {
-                print("❌ Error: \(error.localizedDescription)")
+                print("❌ Error sending profile: \(error.localizedDescription)")
                 return
             }
-            guard let data = data else { return }
-            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            
+            if let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
                 DispatchQueue.main.async {
-                    print("✅ Response: \(json)")
-                    // Yahan success alert ya next screen navigation
+                    print("✅ Profile saved response: \(json)")
                 }
             }
-
         }.resume()
     }
-
 }
-//
+
 #Preview {
     CreateProfileAboutUS()
 }
-
-//  Splash.swift
-//  Tutor Panel
-//
-//  Created by MetaDots on 22/08/2025.
-//
-
-
-
