@@ -6,6 +6,14 @@ struct CreateProfilePicture: View {
     @State private var currentPhase: String = "Photo  >"
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var selectedImage: UIImage? = nil
+    
+    // API states
+    @State private var isLoadingData = false
+    @State private var hasExistingData = false
+    @State private var profilePictureUrl = ""
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    @State private var isUploading = false // New: Upload loading state
 
     let items = [
         "About Us  >",
@@ -34,6 +42,13 @@ struct CreateProfilePicture: View {
                     Spacer()
                 }
 
+                // Loading indicator
+                if isLoadingData {
+                    ProgressView("Loading existing profile picture...")
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding()
+                }
+
                 // 🔄 Steps horizontal scroll
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
@@ -55,16 +70,47 @@ struct CreateProfilePicture: View {
                     .font(.caption)
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.bottom,2)
+                    .padding(.bottom, 2)
 
                 VStack(alignment: .center) {
-                    // ✅ Selected image ya placeholder
+                    // ✅ Image display section
                     if let selectedImage {
+                        // Show locally selected image
                         Image(uiImage: selectedImage)
                             .resizable()
+                            .aspectRatio(contentMode: .fill)
                             .frame(width: 200, height: 200)
-                            .clipShape(Rectangle())
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .shadow(radius: 4)
+                    } else if hasExistingData && !profilePictureUrl.isEmpty {
+                        // Show existing image from URL
+                        AsyncImage(url: URL(string: profilePictureUrl)) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 200, height: 200)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .shadow(radius: 4)
+                            case .failure(_):
+                                // Show error placeholder
+                                Image(systemName: "photo.badge.exclamationmark")
+                                    .resizable()
+                                    .frame(width: 100, height: 100)
+                                    .foregroundColor(.red)
+                            case .empty:
+                                // Show loading placeholder
+                                ProgressView()
+                                    .frame(width: 200, height: 200)
+                                    .background(Color.gray.opacity(0.1))
+                                    .cornerRadius(10)
+                            @unknown default:
+                                EmptyView()
+                            }
+                        }
                     } else {
+                        // Show default placeholder
                         Image(systemName: "person.crop.circle.fill")
                             .resizable()
                             .frame(width: 100, height: 100)
@@ -72,26 +118,41 @@ struct CreateProfilePicture: View {
                     }
 
                     // ✅ Photo picker
-                    PhotosPicker("Pick an Image", selection: $selectedItem, matching: .images)
-                        .onChange(of: selectedItem) { _, newItem in
-                            Task {
-                                if let data = try? await newItem?.loadTransferable(type: Data.self),
-                                   let uiImage = UIImage(data: data) {
-                                    selectedImage = uiImage
-                                }
+                    PhotosPicker(
+                        hasExistingData && !profilePictureUrl.isEmpty ? "Change Image" : "Pick an Image",
+                        selection: $selectedItem,
+                        matching: .images
+                    )
+                    .onChange(of: selectedItem) { _, newItem in
+                        Task {
+                            if let data = try? await newItem?.loadTransferable(type: Data.self),
+                               let uiImage = UIImage(data: data) {
+                                selectedImage = uiImage
+                                print("📁 Profile image selected locally")
                             }
                         }
+                    }
 
-                    // ✅ Upload button
+                    // ✅ Upload button with loading state
                     if let img = selectedImage {
-                        Button("Upload Image") {
+                        Button(action: {
                             uploadProfileImage(image: img)
+                        }) {
+                            HStack {
+                                if isUploading {
+                                    ProgressView()
+                                        .scaleEffect(0.8)
+                                        .foregroundColor(.white)
+                                }
+                                Text(isUploading ? "Uploading..." : "Upload Image")
+                            }
                         }
+                        .disabled(isUploading)
                         .font(.headline)
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.green)
+                        .background(isUploading ? Color.gray : Color.green)
                         .cornerRadius(10)
                         .padding(.vertical)
                     }
@@ -127,14 +188,100 @@ struct CreateProfilePicture: View {
             }
             .padding()
             .navigationBarHidden(true)
+            .alert("Profile Picture", isPresented: $showAlert) {
+                Button("OK") { }
+            } message: {
+                Text(alertMessage)
+            }
+            .onAppear {
+                fetchExistingProfilePicture()
+            }
         }
     }
 
-    // --- 📤 Upload Function ---
-    func uploadProfileImage(image: UIImage) {
-        guard let url = URL(string: "http://localhost:8020/app/ProfilePicture") else { return }
-        guard let token = UserDefaults.standard.string(forKey: "authToken") else { return }
+    // MARK: - Fetch Existing Profile Picture
+    private func fetchExistingProfilePicture() {
+        isLoadingData = true
+        
+        guard let url = URL(string: "http://127.0.0.1:8020/app/GetProfilePic") else {
+            print("❌ Invalid URL for fetching profile picture")
+            isLoadingData = false
+            return
+        }
+        
+        guard let token = UserDefaults.standard.string(forKey: "authToken") else {
+            print("❌ No auth token found")
+            isLoadingData = false
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        print("📤 Fetching existing profile picture...")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                isLoadingData = false
+                
+                if let error = error {
+                    print("❌ Network error: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let data = data else {
+                    print("❌ No data received")
+                    return
+                }
+                
+                do {
+                    if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                        print("📱 Profile Response: \(jsonResponse)")
+                        
+                        if let status = jsonResponse["status"] as? Int, status == 1,
+                           let profileData = jsonResponse["data"] as? [String: Any] {
+                            
+                            // Get picture URL from response
+                            profilePictureUrl = profileData["pictureUrl"] as? String ?? ""
+                            
+                            // Fix localhost to 127.0.0.1 for simulator
+                            if !profilePictureUrl.isEmpty {
+                                profilePictureUrl = profilePictureUrl.replacingOccurrences(of: "localhost", with: "127.0.0.1")
+                                print("🔄 Profile picture URL: \(profilePictureUrl)")
+                            }
+                            
+                            hasExistingData = !profilePictureUrl.isEmpty
+                            print("✅ Profile picture data loaded successfully!")
+                            
+                        } else if let status = jsonResponse["status"] as? Int, status == 0 {
+                            print("ℹ️ No existing profile picture found")
+                            hasExistingData = false
+                        }
+                    }
+                } catch {
+                    print("❌ Error parsing response: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
+    }
 
+    // MARK: - Upload Profile Image
+    func uploadProfileImage(image: UIImage) {
+        guard let url = URL(string: "http://127.0.0.1:8020/app/ProfilePicture") else {
+            alertMessage = "Invalid URL"
+            showAlert = true
+            return
+        }
+        
+        guard let token = UserDefaults.standard.string(forKey: "authToken") else {
+            alertMessage = "No authentication token found. Please login again."
+            showAlert = true
+            return
+        }
+
+        isUploading = true // Start upload loading
+        
         let boundary = UUID().uuidString
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -149,23 +296,68 @@ struct CreateProfilePicture: View {
             body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
             body.append(imageData)
             body.append("\r\n".data(using: .utf8)!)
+            print("📤 Profile image added to request")
         }
 
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         request.httpBody = body
 
+        print("📤 Uploading profile image...")
+
         URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("❌ Error uploading image: \(error.localizedDescription)")
-                return
-            }
-            if let data = data,
-               let json = try? JSONSerialization.jsonObject(with: data) {
-                print("✅ Response: \(json)")
+            DispatchQueue.main.async {
+                isUploading = false // Stop upload loading
+                
+                if let error = error {
+                    alertMessage = "Upload failed: \(error.localizedDescription)"
+                    showAlert = true
+                    print("❌ Error uploading image: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let data = data else {
+                    alertMessage = "No response received"
+                    showAlert = true
+                    return
+                }
+                
+                if let httpResponse = response as? HTTPURLResponse {
+                    print("📊 Status Code: \(httpResponse.statusCode)")
+                }
+                
+                do {
+                    if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                        print("✅ Response: \(jsonResponse)")
+                        
+                        if let status = jsonResponse["status"] as? Int, status == 1 {
+                            alertMessage = jsonResponse["message"] as? String ?? "Profile picture uploaded successfully!"
+                            showAlert = true
+                            hasExistingData = true
+                            
+                            // Update profile picture URL from response
+                            if let pictureUrl = jsonResponse["pictureUrl"] as? String {
+                                profilePictureUrl = pictureUrl.replacingOccurrences(of: "localhost", with: "127.0.0.1")
+                                print("🔄 Updated profile picture URL: \(profilePictureUrl)")
+                            }
+                            
+                            // Clear local image, URL se load ho jayega
+                            selectedImage = nil
+                            
+                            print("✅ Profile picture uploaded successfully!")
+                        } else {
+                            alertMessage = jsonResponse["message"] as? String ?? "Upload failed"
+                            showAlert = true
+                        }
+                    }
+                } catch {
+                    alertMessage = "Error parsing response: \(error.localizedDescription)"
+                    showAlert = true
+                }
             }
         }.resume()
     }
 }
-#Preview { CreateProfilePicture() }
-// Splash.swift
-// Tutor Panel // // Created by MetaDots on 22/08/2025. // // // CreateProfile-Picture.swift // Tutor Panel // // Created by MetaDots on 25/08/2025.
+
+#Preview {
+    CreateProfilePicture()
+}

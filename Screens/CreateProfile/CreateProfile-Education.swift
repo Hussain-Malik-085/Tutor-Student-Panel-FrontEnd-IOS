@@ -17,9 +17,11 @@ struct CreateProfileEducation: View {
     
     // API ke liye states
     @State private var isLoading = false
+    @State private var isLoadingData = false // New: data fetch ke liye
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var certificateUrl = ""
+    @State private var hasExistingData = false // New: check existing data
     
     let items = [
         "About Us >", "Photo >", "Certification >", "Education >",
@@ -42,6 +44,13 @@ struct CreateProfileEducation: View {
                     Spacer()
                 }
                 
+                // Loading indicator for data fetch
+                if isLoadingData {
+                    ProgressView("Loading existing data...")
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding()
+                }
+                
                 // Horizontal phase indicator
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
@@ -55,10 +64,23 @@ struct CreateProfileEducation: View {
                 }
                 
                 // Education title aur description
-                Text("Education")
-                    .font(.headline)
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                HStack {
+                    Text("Education")
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    // Show indicator if data exists
+                    if hasExistingData {
+                        Text("✅ Data Found")
+                            .font(.caption)
+                            .foregroundColor(.green)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.green.opacity(0.1))
+                            .cornerRadius(8)
+                    }
+                }
                 
                 Text("Please provide your educational background details")
                     .font(.caption)
@@ -216,7 +238,7 @@ struct CreateProfileEducation: View {
                             
                             // Upload Certificate Button
                             PhotosPicker(selection: $selectedItem, matching: .images) {
-                                Text("Upload Certificate")
+                                Text(hasExistingData && !certificateUrl.isEmpty ? "Change Certificate" : "Upload Certificate")
                                     .font(.headline)
                                     .foregroundColor(.gray)
                             }
@@ -236,8 +258,7 @@ struct CreateProfileEducation: View {
                                         if let data = try? await newItem?.loadTransferable(type: Data.self),
                                            let uiImage = UIImage(data: data) {
                                             selectedImage = uiImage
-                                            // Certificate ko base64 mein convert kar sakte hain ya file upload kar sakte hain
-                                            certificateUrl = "uploaded_certificate_url" // Placeholder
+                                            print("📁 Certificate image selected")
                                         }
                                     }
                                 }
@@ -266,9 +287,8 @@ struct CreateProfileEducation: View {
                     })
                     
                     Button(action: {
-                        // Pehle data validate karo
                         if validateInputs() {
-                            sendEducationData()
+                            sendEducationDataWithCertificate()
                         }
                     }) {
                         if isLoading {
@@ -281,7 +301,7 @@ struct CreateProfileEducation: View {
                                     .foregroundColor(.white)
                             }
                         } else {
-                            Text("Save & Next")
+                            Text(hasExistingData ? "Update & Next" : "Save & Next")
                                 .font(.headline)
                                 .foregroundColor(.white)
                         }
@@ -302,7 +322,148 @@ struct CreateProfileEducation: View {
             } message: {
                 Text(alertMessage)
             }
+            .onAppear {
+                // View load hone pe existing data fetch karo
+                fetchExistingEducationData()
+            }
         }
+    }
+    
+    // MARK: - NEW: Fetch Existing Data Function
+    private func fetchExistingEducationData() {
+        isLoadingData = true
+        
+        guard let url = URL(string: "http://localhost:8020/app/GetEducation") else {
+            print("❌ Invalid URL for fetching education data")
+            isLoadingData = false
+            return
+        }
+        
+        guard let token = UserDefaults.standard.string(forKey: "authToken") else {
+            print("❌ No auth token found")
+            isLoadingData = false
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        print("📤 Fetching existing education data...")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                isLoadingData = false
+                
+                if let error = error {
+                    print("❌ Network error: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let data = data else {
+                    print("❌ No data received")
+                    return
+                }
+                
+                do {
+                    if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                        print("📱 Response: \(jsonResponse)")
+                        
+                        if let status = jsonResponse["status"] as? Int, status == 1,
+                           let educationData = jsonResponse["data"] as? [String: Any] {
+                            
+                            // Fields auto-fill karo - Backend format ke according
+                            university = educationData["University"] as? String ?? ""
+                            degree = educationData["Degree"] as? String ?? ""
+                            specialization = educationData["Specialization"] as? String ?? ""
+                            certificateUrl = educationData["CertificateUrl"] as? String ?? ""
+                            
+                            // Dates parse karo
+                            let dateFormatter = DateFormatter()
+                            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                            dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+                            
+                            if let startDateString = educationData["StartDate"] as? String,
+                               let parsedStartDate = dateFormatter.date(from: startDateString) {
+                                startDate = parsedStartDate
+                            }
+                            
+                            if let endDateString = educationData["EndDate"] as? String,
+                               let parsedEndDate = dateFormatter.date(from: endDateString) {
+                                endDate = parsedEndDate
+                            }
+                            
+                            // Certificate image load karo (agar URL hai)
+                            if !certificateUrl.isEmpty {
+                                loadCertificateImage()
+                            }
+                            
+                            hasExistingData = true
+                            print("✅ Education data loaded successfully!")
+                            
+                        } else if let status = jsonResponse["status"] as? Int, status == 0 {
+                            // No existing data found - normal case
+                            print("ℹ️ No existing education data found")
+                            hasExistingData = false
+                        }
+                    }
+                } catch {
+                    print("❌ Error parsing response: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
+    }
+    
+    // MARK: - Load Certificate Image from URL
+    private func loadCertificateImage() {
+        guard !certificateUrl.isEmpty, let url = URL(string: certificateUrl) else {
+            print("❌ Invalid certificate URL: \(certificateUrl)")
+            return
+        }
+
+        // Fix double slashes and localhost
+        var mutableUrl = url.absoluteString
+        mutableUrl = mutableUrl.replacingOccurrences(of: "//", with: "/")
+        mutableUrl = mutableUrl.replacingOccurrences(of: "localhost", with: "127.0.0.1")
+        guard let fixedUrl = URL(string: mutableUrl) else {
+            print("❌ Failed to create fixed URL: \(mutableUrl)")
+            return
+        }
+
+        print("📥 Loading certificate image from URL: \(fixedUrl.absoluteString)")
+
+        URLSession.shared.dataTask(with: fixedUrl) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ Error loading certificate image: \(error.localizedDescription)")
+                    print("❌ Full error: \(error)")
+                    return
+                }
+
+                if let httpResponse = response as? HTTPURLResponse {
+                    print("📊 HTTP Status Code: \(httpResponse.statusCode)")
+                    print("📊 Headers: \(httpResponse.allHeaderFields)")
+                }
+
+                guard let data = data, data.count > 0 else {
+                    print("❌ No data received (nil or empty data)")
+                    return
+                }
+
+                print("📊 Data size: \(data.count) bytes")
+
+                guard let image = UIImage(data: data) else {
+                    print("❌ Invalid image data - Data might be corrupted or not an image")
+                    if let base64 = String(data: data.prefix(100), encoding: .utf8) {
+                        print("🔍 First 100 bytes as text: \(base64)")
+                    }
+                    return
+                }
+
+                self.selectedImage = image
+                print("✅ Certificate image loaded successfully! Size: \(data.count) bytes")
+            }
+        }.resume()
     }
     
     // MARK: - Validation Function
@@ -328,30 +489,10 @@ struct CreateProfileEducation: View {
         return true
     }
     
-    // MARK: - API Call Function
-    private func sendEducationData() {
+    // MARK: - Multipart Upload Function (unchanged)
+    private func sendEducationDataWithCertificate() {
         isLoading = true
         
-        // Date formatter - backend ko ISO string format mein bhejenge
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-        
-        // Request body banao
-        var requestBody: [String: Any] = [
-            "University": university,
-            "Degree": degree,
-            "Specialization": specialization.isEmpty ? "" : specialization,
-            "StartDate": dateFormatter.string(from: startDate),
-            "EndDate": dateFormatter.string(from: endDate),
-            //"CertificateUrl": certificateUrl.isEmpty ? nil : certificateUrl
-        ]
-        
-        if !certificateUrl.isEmpty {
-            requestBody["CertificateUrl"] = certificateUrl  // ✅ Now works!
-        }
-        
-        // URL aur request setup
         guard let url = URL(string: "http://localhost:8020/app/CreateEducation") else {
             alertMessage = "Invalid URL"
             showAlert = true
@@ -359,33 +500,64 @@ struct CreateProfileEducation: View {
             return
         }
         
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // JWT Token - UserDefaults se lao (same key jo AboutUS me use ho rahi hai)
-        if let token = UserDefaults.standard.string(forKey: "authToken") {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            print("📱 Using token: \(token)")
-        } else {
+        guard let token = UserDefaults.standard.string(forKey: "authToken") else {
             alertMessage = "No authentication token found. Please login again."
             showAlert = true
             isLoading = false
             return
         }
         
-        // JSON body set karo
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: requestBody, options: [])
-            request.httpBody = jsonData
-        } catch {
-            alertMessage = "Error creating request: \(error.localizedDescription)"
-            showAlert = true
-            isLoading = false
-            return
+        let boundary = UUID().uuidString
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // Date formatter
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+        
+        var body = Data()
+        
+        // Add text fields
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"University\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(university)\r\n".data(using: .utf8)!)
+        
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"Degree\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(degree)\r\n".data(using: .utf8)!)
+        
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"Specialization\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(specialization)\r\n".data(using: .utf8)!)
+        
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"StartDate\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(dateFormatter.string(from: startDate))\r\n".data(using: .utf8)!)
+        
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"EndDate\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(dateFormatter.string(from: endDate))\r\n".data(using: .utf8)!)
+        
+        // Add certificate file if selected
+        if let selectedImage = selectedImage,
+           let imageData = selectedImage.jpegData(compressionQuality: 0.8) {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"certificate\"; filename=\"certificate.jpg\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+            body.append(imageData)
+            body.append("\r\n".data(using: .utf8)!)
+            print("📤 Certificate image added to request")
         }
         
-        // API call karo
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        request.httpBody = body
+        
+        print("📤 Sending multipart request...")
+        
+        // API call
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 isLoading = false
@@ -402,19 +574,19 @@ struct CreateProfileEducation: View {
                     return
                 }
                 
-                // Response parse karo
                 do {
                     if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                        print("📱 Response received: \(jsonResponse)")
                         
                         if let status = jsonResponse["status"] as? Int, status == 1 {
                             // Success
                             alertMessage = jsonResponse["message"] as? String ?? "Education data saved successfully!"
                             showAlert = true
+                            hasExistingData = true
                             
                             // Success ke baad next screen pe navigate karo
                             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                // Navigation to next screen
-                                // Ye tumhare navigation structure ke hisab se adjust karo
+                                print("✅ Education data saved successfully!")
                             }
                         } else {
                             // Error
