@@ -271,7 +271,7 @@ struct CreateProfileEducation: View {
                 
                 // Navigation buttons outside ScrollView
                 HStack {
-                    NavigationLink(destination: CreateProfilePicture()) {
+                    NavigationLink(destination: CreateProfileDescription()) {
                         Text("Previous")
                             .font(.headline)
                             .foregroundColor(.black)

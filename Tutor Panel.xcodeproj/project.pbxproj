@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		B8706B172E70326A0029F18A /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = B8706B162E7032640029F18A /* .gitignore */; };
+		B8D2D99D2E798FF700033A7E /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = B8D2D99C2E798FF700033A7E /* GoogleSignIn */; };
+		B8D2D99F2E798FF700033A7E /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B8D2D99E2E798FF700033A7E /* GoogleSignInSwift */; };
+		B8D2D9A22E79991300033A7E /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = B8D2D9A12E79991300033A7E /* FirebaseAuth */; };
+		B8EF72BE2E78563900A212D2 /* Auth0 in Frameworks */ = {isa = PBXBuildFile; productRef = B8EF72BD2E78563900A212D2 /* Auth0 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,6 +30,19 @@
 			remoteInfo = "Tutor Panel";
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B8490AD52E783E5700337F06 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		B807336D2E58553D00B3551C /* Tutor Panel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tutor Panel.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -62,6 +79,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B8D2D99F2E798FF700033A7E /* GoogleSignInSwift in Frameworks */,
+				B8EF72BE2E78563900A212D2 /* Auth0 in Frameworks */,
+				B8D2D99D2E798FF700033A7E /* GoogleSignIn in Frameworks */,
+				B8D2D9A22E79991300033A7E /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,6 +112,7 @@
 				B80733872E58553F00B3551C /* Tutor PanelUITests */,
 				B807336E2E58553D00B3551C /* Products */,
 				B80733A92E585A2500B3551C /* Screens */,
+				B8EF72BC2E78563900A212D2 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -104,6 +126,13 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		B8EF72BC2E78563900A212D2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -114,6 +143,7 @@
 				B80733692E58553D00B3551C /* Sources */,
 				B807336A2E58553D00B3551C /* Frameworks */,
 				B807336B2E58553D00B3551C /* Resources */,
+				B8490AD52E783E5700337F06 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -124,8 +154,6 @@
 				B80733A92E585A2500B3551C /* Screens */,
 			);
 			name = "Tutor Panel";
-			packageProductDependencies = (
-			);
 			productName = "Tutor Panel";
 			productReference = B807336D2E58553D00B3551C /* Tutor Panel.app */;
 			productType = "com.apple.product-type.application";
@@ -147,8 +175,6 @@
 				B807337D2E58553E00B3551C /* Tutor PanelTests */,
 			);
 			name = "Tutor PanelTests";
-			packageProductDependencies = (
-			);
 			productName = "Tutor PanelTests";
 			productReference = B807337A2E58553E00B3551C /* Tutor PanelTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -157,9 +183,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B80733942E58553F00B3551C /* Build configuration list for PBXNativeTarget "Tutor PanelUITests" */;
 			buildPhases = (
+				39497DF7275E5DBDC95C4E1E /* [CP] Check Pods Manifest.lock */,
 				B80733802E58553F00B3551C /* Sources */,
 				B80733812E58553F00B3551C /* Frameworks */,
 				B80733822E58553F00B3551C /* Resources */,
+				9D3DCE71AB043CA1D0F68A93 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -170,8 +198,6 @@
 				B80733872E58553F00B3551C /* Tutor PanelUITests */,
 			);
 			name = "Tutor PanelUITests";
-			packageProductDependencies = (
-			);
 			productName = "Tutor PanelUITests";
 			productReference = B80733842E58553F00B3551C /* Tutor PanelUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -210,6 +236,10 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				B82307042E68412900D7C86D /* XCRemoteSwiftPackageReference "Alamofire" */,
+				B84909672E78112000337F06 /* XCRemoteSwiftPackageReference "Auth0" */,
+				B8EF72C32E7860A200A212D2 /* XCRemoteSwiftPackageReference "JWTDecode" */,
+				B8D2D99B2E798FF700033A7E /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				B8D2D9A02E79991300033A7E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B807336E2E58553D00B3551C /* Products */;
@@ -247,6 +277,52 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		39497DF7275E5DBDC95C4E1E /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Tutor Panel-Tutor PanelUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9D3DCE71AB043CA1D0F68A93 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Tutor Panel-Tutor PanelUITests/Pods-Tutor Panel-Tutor PanelUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Tutor Panel-Tutor PanelUITests/Pods-Tutor Panel-Tutor PanelUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Tutor Panel-Tutor PanelUITests/Pods-Tutor Panel-Tutor PanelUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B80733692E58553D00B3551C /* Sources */ = {
@@ -414,6 +490,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Tutor-Panel-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -441,6 +518,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Tutor-Panel-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -579,7 +657,62 @@
 				minimumVersion = 5.10.2;
 			};
 		};
+		B84909672E78112000337F06 /* XCRemoteSwiftPackageReference "Auth0" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/auth0/Auth0.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.15.0;
+			};
+		};
+		B8D2D99B2E798FF700033A7E /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+		B8D2D9A02E79991300033A7E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.3.0;
+			};
+		};
+		B8EF72C32E7860A200A212D2 /* XCRemoteSwiftPackageReference "JWTDecode" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/auth0/JWTDecode.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.3.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B8D2D99C2E798FF700033A7E /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B8D2D99B2E798FF700033A7E /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		B8D2D99E2E798FF700033A7E /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B8D2D99B2E798FF700033A7E /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		B8D2D9A12E79991300033A7E /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B8D2D9A02E79991300033A7E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		B8EF72BD2E78563900A212D2 /* Auth0 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B84909672E78112000337F06 /* XCRemoteSwiftPackageReference "Auth0" */;
+			productName = Auth0;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B80733652E58553D00B3551C /* Project object */;
 }

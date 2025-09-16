@@ -4,14 +4,14 @@
 //
 //  Created by MetaDots on 22/08/2025.
 //
-
+//
 //
 //  FirstScreen.swift
 //  TestApp
 //
 //  Created by MetaDots on 21/08/2025.
 //
-
+//
 //import SwiftUI
 //
 //struct Signup: View {
@@ -202,9 +202,13 @@
 //#Preview {
 //    Signup()
 //}
-
+///////Previous Previous Code
 
 import SwiftUI
+import Auth0
+
+let auth0 = Auth0.authentication()
+
 
 struct Signup: View {
     @State private var username: String = ""
@@ -412,3 +416,6 @@ struct Signup: View {
 #Preview {
     Signup()
 }
+
+
+

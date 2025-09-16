@@ -55,7 +55,7 @@ struct CreateProfileDescription: View {
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
-                Text("Lorem Ipsum is simply dummy text of the printing and typesetting industry.")
+                Text("Tell your story in a few words.Make your profile stand out with a clear description.")
                     .font(.caption)
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity, alignment: .leading)
