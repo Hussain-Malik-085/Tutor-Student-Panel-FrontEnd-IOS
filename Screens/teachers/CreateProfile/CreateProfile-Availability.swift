@@ -79,16 +79,28 @@ struct CreateProfileAvailability: View {
                 .padding(.bottom, 8)
                 
                 // Horizontal phase indicator
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
-                        ForEach(items, id: \.self) { item in
-                            Text(item)
-                                .font(.caption)
-                                .foregroundColor(item == currentPhase ? .red : .black)
-                                .fontWeight(item == currentPhase ? .bold : .regular)
+                ScrollViewReader { proxy in
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                ForEach(items, id: \.self) { item in
+                                    Text(item)
+                                        .font(.caption)
+                                        .foregroundColor(item == currentPhase ? .red : .black)
+                                        .fontWeight(item == currentPhase ? .bold : .regular)
+                                        .id(item) // 👈 har item ki id
+                                }
+                            }
+                        }
+                        .onChange(of: currentPhase) { oldValue,newValue in
+                            withAnimation {
+                                proxy.scrollTo(newValue, anchor: .leading) // 👈 leading use karo
+                            }
+                        }
+                        .onAppear {
+                            // jab view first time load ho to bhi currentPhase ko scroll karo
+                            proxy.scrollTo(currentPhase, anchor: .leading)
                         }
                     }
-                }
                 .padding(.bottom, 12)
                 
                 // Section Title

@@ -41,16 +41,28 @@ struct CreateProfileAboutUS: View {
                 .padding(.bottom, 10)
                 
                 // Horizontal Phase Scroll
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
-                        ForEach(items, id: \.self) { item in
-                            Text(item)
-                                .font(.caption)
-                                .foregroundColor(item == currentPhase ? .red : .black)
-                                .fontWeight(item == currentPhase ? .bold : .regular)
+                ScrollViewReader { proxy in
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                ForEach(items, id: \.self) { item in
+                                    Text(item)
+                                        .font(.caption)
+                                        .foregroundColor(item == currentPhase ? .red : .black)
+                                        .fontWeight(item == currentPhase ? .bold : .regular)
+                                        .id(item) // 👈 har item ki id
+                                }
+                            }
+                        }
+                        .onChange(of: currentPhase) { oldValue,newValue in
+                            withAnimation {
+                                proxy.scrollTo(newValue, anchor: .leading) // 👈 leading use karo
+                            }
+                        }
+                        .onAppear {
+                            // jab view first time load ho to bhi currentPhase ko scroll karo
+                            proxy.scrollTo(currentPhase, anchor: .leading)
                         }
                     }
-                }
                 
                 Text("About Us")
                     .font(.headline)
@@ -168,7 +180,7 @@ struct CreateProfileAboutUS: View {
     
     // MARK: - Fetch Profile
     func fetchProfileData() {
-        guard let url = URL(string: "http://localhost:8020/app/GetProfile") else { return }
+        guard let url = URL(string: "http://localhost:8020/app/tutor/getprofile") else { return }
         guard let token = UserDefaults.standard.string(forKey: "authToken") else { return }
         
         print("📱 Fetching profile with token: \(token)")
@@ -244,7 +256,7 @@ struct CreateProfileAboutUS: View {
     
     // MARK: - Send Profile Data
     func sendProfileData() {
-        guard let url = URL(string: "http://localhost:8020/app/CreateProfileAboutUs") else { return }
+        guard let url = URL(string: "http://localhost:8020/app/tutor/createprofileaboutus") else { return }
         guard let token = UserDefaults.standard.string(forKey: "authToken") else { return }
         
         let body: [String: Any] = [

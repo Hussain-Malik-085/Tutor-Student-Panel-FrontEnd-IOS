@@ -203,7 +203,7 @@ struct CreateProfilePicture: View {
     private func fetchExistingProfilePicture() {
         isLoadingData = true
         
-        guard let url = URL(string: "http://127.0.0.1:8020/app/GetProfilePic") else {
+        guard let url = URL(string: "http://127.0.0.1:8020/app/tutor/getprofilepic") else {
             print("❌ Invalid URL for fetching profile picture")
             isLoadingData = false
             return
@@ -268,7 +268,7 @@ struct CreateProfilePicture: View {
 
     // MARK: - Upload Profile Image
     func uploadProfileImage(image: UIImage) {
-        guard let url = URL(string: "http://127.0.0.1:8020/app/ProfilePicture") else {
+        guard let url = URL(string: "http://127.0.0.1:8020/app/tutor/profilepicture") else {
             alertMessage = "Invalid URL"
             showAlert = true
             return

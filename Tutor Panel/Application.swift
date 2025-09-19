@@ -17,6 +17,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Configure Firebase
         FirebaseApp.configure()
         
+        // 🔎 Debugging: Check Firebase Client ID
+        if let clientID = FirebaseApp.app()?.options.clientID {
+            print("✅ Firebase Client ID loaded: \(clientID)")
+        } else {
+            print("❌ No Firebase Client ID found")
+        }
+        
+        
         return true
     }
     
