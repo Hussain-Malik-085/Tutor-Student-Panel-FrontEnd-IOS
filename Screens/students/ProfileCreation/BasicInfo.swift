@@ -19,6 +19,7 @@ struct BasicInfoProfile: View {
     @State private var selectedDate: Date? = nil
     @State private var showDatePicker = false
     @State private var isLoading: Bool = false
+    @State private var navigateToNext = false
     
     let items = [
         "Basic Info  >",
@@ -183,16 +184,17 @@ struct BasicInfoProfile: View {
                                 .foregroundColor(.red)
                                 .font(.caption)
                         }
-                        
+                        Spacer()
+                        Spacer()}
                         // Next Button
                         Button(action: {
-                            sendProfileData { success in
-                                if success {
-                                   // navigateToNext = true
-                                    // Navigate to the next screen (CreateProfilePicture)
-                                    // This will be handled by NavigationLink in the view
+                            isLoading = true
+                                sendProfileData { success in
+                                    isLoading = false
+                                    if success {
+                                        navigateToNext = true   // 👉 ye navigation ko trigger karega
+                                    }
                                 }
-                            }
                         }) {
                             Text(isLoading ? "Saving..." : "Next")
                                 .foregroundColor(.white)
@@ -203,14 +205,15 @@ struct BasicInfoProfile: View {
                                 .disabled(isLoading)
                         }
                         .background(
-                            NavigationLink(destination: CreateProfilePicture(), isActive: Binding(
-                                get: { false },
-                                set: { _ in }
-                            )) { EmptyView() }
+                            NavigationLink(
+                          destination: ProfilePicture(),
+                           isActive: $navigateToNext   // 👉 ab navigateToNext state se link hoga
+                            ) { EmptyView() }
                         )
+                        
                     }
                     .padding(.bottom, 20)
-                }
+                
             }
             .padding()
             .navigationBarHidden(true)

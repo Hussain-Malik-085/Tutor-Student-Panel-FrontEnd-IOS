@@ -131,7 +131,7 @@ struct ProfilePicture: View {
                             if let data = try? await newItem?.loadTransferable(type: Data.self),
                                let uiImage = UIImage(data: data) {
                                 selectedImage = uiImage
-                                print("📁 Profile image selected locally")
+                                print("📁 Student Profile image selected locally")
                             }
                         }
                     }
@@ -206,7 +206,7 @@ struct ProfilePicture: View {
     private func fetchExistingProfilePicture() {
         isLoadingData = true
         
-        guard let url = URL(string: "http://127.0.0.1:8020/app/student/GetProfilePic") else {
+        guard let url = URL(string: "http://127.0.0.1:8020/app/student/getprofilepicture") else {
             print("❌ Invalid URL for fetching profile picture")
             isLoadingData = false
             return
@@ -271,7 +271,7 @@ struct ProfilePicture: View {
 
     // MARK: - Upload Profile Image
     func uploadProfileImage(image: UIImage) {
-        guard let url = URL(string: "http://127.0.0.1:8020/app/ProfilePicture") else {
+        guard let url = URL(string: "http://127.0.0.1:8020/app/student/profilepicture") else {
             alertMessage = "Invalid URL"
             showAlert = true
             return
@@ -305,7 +305,7 @@ struct ProfilePicture: View {
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         request.httpBody = body
 
-        print("📤 Uploading profile image...")
+        print("📤 Uploading Student profile image...")
 
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {

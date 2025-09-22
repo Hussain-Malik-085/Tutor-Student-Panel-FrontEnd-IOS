@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RoleSelection: View {
-    @State private var selectedRole: String? = "student" // Default role
+    @State private var selectedRole: String? = nil  // Initially nil - user must select
     @State private var isLoading = false
     @State private var navigateNext = false
     @State private var errorMessage: String? = nil
@@ -21,7 +21,7 @@ struct RoleSelection: View {
                 
                 Text("Join as a Teacher or Student")
                     .font(.body)
-                    .padding(.leading,1)
+                    .padding(.leading, 1)
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
@@ -62,8 +62,7 @@ struct RoleSelection: View {
                 
                 Spacer()
                 
-          
-                // ✅ Next button with conditional navigation
+                // ✅ Next button - only enabled when role is selected
                 NavigationLink(
                     destination: Group {
                         if selectedRole == "student" {
@@ -74,20 +73,25 @@ struct RoleSelection: View {
                     },
                     isActive: $navigateNext
                 ) {
-                    Text(isLoading ? "Updating..." : "Create your Profile")
+                    Text(getButtonText())
                         .font(.headline)
                         .foregroundColor(.white)
                         .padding(13)
                         .frame(maxWidth: .infinity)
-                        .background(isLoading ? Color.gray : Color(red: 12/255, green: 144/255, blue: 121/255))
+                        .background(getButtonColor())
                         .cornerRadius(10)
                         .padding(.vertical)
                 }
-                .disabled(isLoading || userId.isEmpty)
-
-
+                .disabled(shouldDisableButton())
                 
-
+                // ✅ Helper text when no role selected
+                if selectedRole == nil {
+                    Text("Please select a role to continue")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                        .padding(.top, 5)
+                }
+                
                 // Error Message
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
@@ -99,15 +103,42 @@ struct RoleSelection: View {
         }
     }
     
+    // ✅ Helper functions for button state
+    private func shouldDisableButton() -> Bool {
+        return isLoading || selectedRole == nil || userId.isEmpty
+    }
+    
+    private func getButtonText() -> String {
+        if isLoading {
+            return "Updating..."
+        } else if selectedRole == nil {
+            return "Select Role First"
+        } else {
+            return "Create your Profile"
+        }
+    }
+    
+    private func getButtonColor() -> Color {
+        if shouldDisableButton() {
+            return Color.gray
+        } else {
+            return Color(red: 12/255, green: 144/255, blue: 121/255)
+        }
+    }
+    
     // 🔹 API Call
     func updateRoleOnServer(role: String) {
         let userId = UserDefaults.standard.string(forKey: "userId") ?? ""
         guard !userId.isEmpty else {
             print("❌ UserID not found in UserDefaults")
+            errorMessage = "User ID not found. Please login again."
             return
         }
         
-        guard let url = URL(string:"http://localhost:8020/app/api/\(userId)/role") else { return }
+        guard let url = URL(string:"http://localhost:8020/app/api/\(userId)/role") else {
+            errorMessage = "Invalid URL"
+            return
+        }
         
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
@@ -121,25 +152,33 @@ struct RoleSelection: View {
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
         
         isLoading = true
+        errorMessage = nil  // Clear previous errors
+        
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 isLoading = false
+                
                 if let error = error {
                     print("Error updating role: \(error)")
+                    errorMessage = "Failed to update role. Please try again."
                     return
                 }
+                
                 if let httpResponse = response as? HTTPURLResponse {
                     print("📡 Status Code: \(httpResponse.statusCode)")
+                    
+                    if httpResponse.statusCode == 200 {
+                        print("✅ Role updated to \(role)")
+                        // Navigation sirf successful API call ke baad hi enable hogi
+                        navigateNext = true
+                    } else {
+                        errorMessage = "Failed to update role (Status: \(httpResponse.statusCode))"
+                    }
                 }
-                print("✅ Role updated to \(role)")
-                navigateNext = true
             }
         }.resume()
     }
-
 }
-
-
 
 #Preview {
     RoleSelection()

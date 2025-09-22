@@ -354,6 +354,7 @@ struct Signup: View {
     }
     
     // MARK: - Send Firebase Token to Backend
+    // MARK: - Send Firebase Token to Backend
     func sendFirebaseTokenToBackend(idToken: String) {
         guard let url = URL(string: "http://localhost:8020/app/firebase-login") else {
             isLoading = false
@@ -406,6 +407,17 @@ struct Signup: View {
                                     UserDefaults.standard.set(provider, forKey: "LoginProvider")
                                     print("Saved Provider: \(provider)")
                                 }
+                                // ✅ YAHAN MASLA THA - userId save karna zaroori hai
+                                if let userId = userData["userId"] as? String {
+                                    UserDefaults.standard.set(userId, forKey: "userId")
+                                    print("Saved userId: \(userId)")
+                                } else if let userId = userData["id"] as? String {
+                                    UserDefaults.standard.set(userId, forKey: "userId")
+                                    print("Saved userId: \(userId)")
+                                } else if let userId = userData["_id"] as? String {
+                                    UserDefaults.standard.set(userId, forKey: "userId")
+                                    print("Saved userId: \(userId)")
+                                }
                             }
                             
                             self.alertMessage = "Welcome Successfully!"
@@ -427,8 +439,7 @@ struct Signup: View {
             }
         }
         task.resume()
-    }
-}
+    }}
 
 #Preview {
     Signup()
