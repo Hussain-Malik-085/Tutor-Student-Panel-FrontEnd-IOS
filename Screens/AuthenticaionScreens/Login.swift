@@ -250,6 +250,11 @@ struct Login: View {
                                 UserDefaults.standard.set(uemail, forKey: "Email")
                                 print("Saved Email: \(uemail)")
                             }
+                            
+                            if let uid = userData["_id"] as? String {
+                                                        UserDefaults.standard.set(uid, forKey: "userId")
+                                                        print("Saved UserId: \(uid)")
+                                                    }
                         }
                         
                         navigateToRoleSelection = true
