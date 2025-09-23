@@ -65,7 +65,7 @@ struct CompletingProfileTutor: View {
                 
                 // Navigation to next screen
                 NavigationLink(
-                    destination: Login(), // Random screen
+                    destination: Navigations(), // Random screen
                     isActive: $navigateToNext
                 ) {
                     EmptyView()

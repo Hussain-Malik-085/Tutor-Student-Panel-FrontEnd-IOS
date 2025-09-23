@@ -201,7 +201,7 @@ struct CreateProfileDescription: View {
                 
                 // Hidden NavigationLink for programmatic navigation
                 NavigationLink(
-                    destination: CreateProfileAvailability(),
+                    destination: CompletingProfileTutor(),
                     isActive: $navigateToAvailability
                 ) { EmptyView() }
             }

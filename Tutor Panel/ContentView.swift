@@ -18,7 +18,7 @@ struct ContentView: View {
             }
             else {
                 NavigationStack {
-                    Signup()
+                    Navigations()
                 }
             }
         }

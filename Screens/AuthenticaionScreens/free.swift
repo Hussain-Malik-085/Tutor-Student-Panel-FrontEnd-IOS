@@ -1,100 +1,50 @@
 //
-//  free.swift
-//  Tutor Panel
+//import SwiftUI
 //
-//  Created by MetaDots on 22/09/2025.
+//struct TeacherCard: View {
+//    
+//    struct Teacher: Identifiable, Codable {
+//        let id: String
+//        let name: String
+//        let location: String
+//        let experience: String
+//        let degree: String
+//        let phone: String
+//        let specialization: String
+//        let language: String
+//    }
 //
-
-import SwiftUI
-
-struct ProfileCreatedSuccess: View {
-    @State private var navigateToNext = false
-    
-    var body: some View {
-        NavigationStack {
-            VStack {
-                Spacer()
-                
-                // Green checkmark circle
-                ZStack {
-                    Circle()
-                        .stroke(Color.green, lineWidth: 3)
-                        .frame(width: 80, height: 80)
-                    
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 35, weight: .bold))
-                        .foregroundColor(.green)
-                }
-                .padding(.bottom, 40)
-                
-                // Success text
-                Text("Your Profile Has Been Created Successfully!")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 16)
-                
-                // Description text
-                Text("Lorem Ipsum is simply dummy text of the printing and typesetting industry.")
-                    .font(.body)
-                    .foregroundColor(.gray)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 30)
-                
-                Spacer()
-                Spacer()
-                
-                // Continue button
-                Button(action: {
-                    navigateToNext = true
-                }) {
-                    Text("Continue")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(red: 12/255, green: 144/255, blue: 121/255))
-                        .cornerRadius(10)
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 30)
-                
-                // Navigation to next screen
-                NavigationLink(
-                    destination: RandomNextScreen(), // Random screen
-                    isActive: $navigateToNext
-                ) {
-                    EmptyView()
-                }
-            }
-            .navigationBarHidden(true)
-            .background(Color.white)
-        }
-    }
-}
-
-// Random placeholder screen for navigation
-struct RandomNextScreen: View {
-    var body: some View {
-        VStack {
-            Spacer()
-            
-            Text("Welcome to Main App!")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding()
-            
-            Text("Your profile setup is complete.")
-                .font(.body)
-                .foregroundColor(.gray)
-            
-            Spacer()
-        }
-        .navigationBarHidden(true)
-    }
-}
-
-#Preview {
-    ProfileCreatedSuccess()
-}
+//    let teacher: Teacher
+//    
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 8) {
+//            Text(teacher.name)
+//                .font(.headline)
+//            
+//            Text(teacher.location)
+//                .font(.subheadline)
+//                .foregroundColor(.secondary)
+//            
+//            Text("Experience: \(teacher.experience)")
+//                .font(.subheadline)
+//            
+//            Text("Degree: \(teacher.degree)")
+//                .font(.subheadline)
+//            
+//            Text("Specialization: \(teacher.specialization)")
+//                .font(.subheadline)
+//                .lineLimit(2) // sirf 2 lines dikhaye, click pe details screen dikhana
+//            
+//            Text("Languages: \(teacher.language)")
+//                .font(.subheadline)
+//        }
+//        .padding()
+//        .background(Color.white)
+//        .cornerRadius(12)
+//        .shadow(radius: 4)
+//        .padding(.horizontal)
+//    }
+//}
+//#Preview {
+//    TeacherCard()
+//}
