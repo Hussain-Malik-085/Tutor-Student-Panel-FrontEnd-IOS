@@ -16,22 +16,37 @@ import SwiftUI
 
 struct HomeView: View {
     @Binding var isDrawerOpen: Bool
-    @State private var teachers: [TeacherCard] = []
+    @State private var teachers: [TeacherModel] = []
     @State private var isLoading = true
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                if isLoading {
-                    ProgressView("Loading teachers...")
-                } else {
-                    VStack(spacing: 20) {
-                        ForEach(teachers) { teacher in
-                            
-                            TeacherCardView(teacher: teacher)
+            VStack(alignment: .leading) {
+                
+                // ✅ Tutors count (fixed at top, not scrolling)
+                Text("\(teachers.count) Tutors Available")
+                    .font(.caption)
+                    .padding(.leading)
+                    .padding(.top, 8)
+                
+                // ✅ Scroll starts from here
+                ScrollView {
+                    if isLoading {
+                        ProgressView("Loading teachers...")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.top, 20)
+                    } else {
+                        VStack(spacing: 20) {
+                            ForEach(teachers) { teacher in
+                                NavigationLink(destination: TeacherProfileView(teacher: teacher)) {
+                                    TeacherCardView(teacher: teacher)
+                                        .contentShape(Rectangle()) // ✅ pura card tappable ho jaye
+                                }
+                                .buttonStyle(PlainButtonStyle()) // ✅ default blue highlight hata dega
+                            }
                         }
+                        .padding(.top)
                     }
-                    .padding(.top)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -48,6 +63,7 @@ struct HomeView: View {
                     }) {
                         Image(systemName: "person.crop.circle")
                             .font(.title)
+                            .foregroundColor(.green) 
                     }
                 }
             }
@@ -58,12 +74,12 @@ struct HomeView: View {
     }
     
     private func fetchTeachers() {
-        guard let url = URL(string: "http://localhost:8020/app/navigation/tutorcard") else { return }
+        guard let url = URL(string: "http://localhost:8020/app/navigation/tutorcardprofile") else { return }
         
         URLSession.shared.dataTask(with: url) { data, response, error in
             if let data = data {
                 do {
-                    let decodedTeachers = try JSONDecoder().decode([TeacherCard].self, from: data)
+                    let decodedTeachers = try JSONDecoder().decode([TeacherModel].self, from: data)
                     DispatchQueue.main.async {
                         self.teachers = decodedTeachers
                         self.isLoading = false

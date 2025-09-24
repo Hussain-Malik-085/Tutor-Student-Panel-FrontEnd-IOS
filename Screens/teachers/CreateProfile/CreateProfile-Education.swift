@@ -379,7 +379,7 @@ struct CreateProfileEducation: View {
         }
     }
     
-    // MARK: - Fetch Existing Data Function
+    // MARK: - Fetch Existing Data Function - COMPLETE FIX
     private func fetchExistingEducationData() async {
         await MainActor.run {
             isLoadingData = true
@@ -435,33 +435,55 @@ struct CreateProfileEducation: View {
                                 specialization = educationData["Specialization"] as? String ?? ""
                                 certificateUrl = educationData["CertificateUrl"] as? String ?? ""
                                 
-                                // Fixed date parsing with multiple formats
-                                let dateFormatters = [
-                                    createDateFormatter("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
-                                    createDateFormatter("yyyy-MM-dd'T'HH:mm:ss'Z'"),
-                                    createDateFormatter("yyyy-MM-dd")
-                                ]
+                                // FIXED: Better date parsing with UTC handling
+                                let isoFormatter = ISO8601DateFormatter()
+                                isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                                
+                                let backupFormatter = DateFormatter()
+                                backupFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                                backupFormatter.timeZone = TimeZone(abbreviation: "UTC")
+                                
+                                let simpleFormatter = DateFormatter()
+                                simpleFormatter.dateFormat = "yyyy-MM-dd"
+                                simpleFormatter.timeZone = TimeZone.current
                                 
                                 if let startDateString = educationData["StartDate"] as? String {
-                                    for formatter in dateFormatters {
-                                        if let parsedStartDate = formatter.date(from: startDateString) {
-                                            startDate = parsedStartDate
-                                            break
-                                        }
+                                    print("Parsing StartDate: \(startDateString)")
+                                    
+                                    if let parsedDate = isoFormatter.date(from: startDateString) {
+                                        startDate = parsedDate
+                                        print("Parsed StartDate with ISO8601: \(startDate)")
+                                    } else if let parsedDate = backupFormatter.date(from: startDateString) {
+                                        startDate = parsedDate
+                                        print("Parsed StartDate with backup formatter: \(startDate)")
+                                    } else if let parsedDate = simpleFormatter.date(from: startDateString) {
+                                        startDate = parsedDate
+                                        print("Parsed StartDate with simple formatter: \(startDate)")
+                                    } else {
+                                        print("Failed to parse StartDate: \(startDateString)")
                                     }
                                 }
                                 
                                 if let endDateString = educationData["EndDate"] as? String {
-                                    for formatter in dateFormatters {
-                                        if let parsedEndDate = formatter.date(from: endDateString) {
-                                            endDate = parsedEndDate
-                                            break
-                                        }
+                                    print("Parsing EndDate: \(endDateString)")
+                                    
+                                    if let parsedDate = isoFormatter.date(from: endDateString) {
+                                        endDate = parsedDate
+                                        print("Parsed EndDate with ISO8601: \(endDate)")
+                                    } else if let parsedDate = backupFormatter.date(from: endDateString) {
+                                        endDate = parsedDate
+                                        print("Parsed EndDate with backup formatter: \(endDate)")
+                                    } else if let parsedDate = simpleFormatter.date(from: endDateString) {
+                                        endDate = parsedDate
+                                        print("Parsed EndDate with simple formatter: \(endDate)")
+                                    } else {
+                                        print("Failed to parse EndDate: \(endDateString)")
                                     }
                                 }
                                 
                                 hasExistingData = true
                                 print("Education data loaded successfully!")
+                                print("Final dates - Start: \(startDate), End: \(endDate)")
                             }
                             
                             if !certificateUrl.isEmpty {
@@ -485,14 +507,6 @@ struct CreateProfileEducation: View {
                 isLoadingData = false
             }
         }
-    }
-    
-    // MARK: - Helper function to create date formatter
-    private func createDateFormatter(_ format: String) -> DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateFormat = format
-        formatter.timeZone = TimeZone(abbreviation: "UTC")
-        return formatter
     }
     
     // MARK: - Load Certificate Image from URL
@@ -523,7 +537,7 @@ struct CreateProfileEducation: View {
         }
     }
     
-    // MARK: - Validation Function - Removed future date checks
+    // MARK: - Validation Function - IMPROVED
     private func validateInputs() -> Bool {
         if university.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             alertMessage = "Please enter university name"
@@ -537,17 +551,29 @@ struct CreateProfileEducation: View {
             return false
         }
         
-        if endDate < startDate {
+        // FIXED: More accurate date comparison
+        let calendar = Calendar.current
+        let startComponents = calendar.dateComponents([.year, .month, .day], from: startDate)
+        let endComponents = calendar.dateComponents([.year, .month, .day], from: endDate)
+        
+        guard let startDateOnly = calendar.date(from: startComponents),
+              let endDateOnly = calendar.date(from: endComponents) else {
+            alertMessage = "Invalid date selection"
+            showAlert = true
+            return false
+        }
+        
+        if endDateOnly < startDateOnly {
             alertMessage = "End date cannot be earlier than start date"
             showAlert = true
             return false
         }
         
+        print("✅ Date validation passed - Start: \(startDateOnly), End: \(endDateOnly)")
         return true
     }
     
-   
-    // MARK: - Send Education Data Function - Simplified date format
+    // MARK: - Send Education Data Function - COMPLETE DATE FIX
     private func sendEducationDataWithCertificate() async -> Bool {
         guard let url = URL(string: "http://localhost:8020/app/tutor/createeducation") else {
             await MainActor.run {
@@ -571,18 +597,19 @@ struct CreateProfileEducation: View {
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
-        // Simplified date formatting - use simple YYYY-MM-DD format
+        // FIXED: Use UTC date formatter to avoid timezone issues
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        dateFormatter.timeZone = TimeZone.current
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
         
         var body = Data()
         
+        // FIXED: Convert dates to UTC and format properly
         let formattedStartDate = dateFormatter.string(from: startDate)
         let formattedEndDate = dateFormatter.string(from: endDate)
         
-        print("Formatted StartDate: \(formattedStartDate)")
-        print("Formatted EndDate: \(formattedEndDate)")
+        print("Formatted StartDate (UTC): \(formattedStartDate)")
+        print("Formatted EndDate (UTC): \(formattedEndDate)")
         
         // Add form fields
         body.append("--\(boundary)\r\n".data(using: .utf8)!)

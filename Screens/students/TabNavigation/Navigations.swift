@@ -16,38 +16,43 @@ struct Navigations: View {
                 // 1. Home Tab
                 HomeView(isDrawerOpen: $isDrawerOpen)
                     .tabItem {
-                        Image(systemName: "house.fill") // Home icon
+                        Image(systemName: "house")
+                           
+                            // Home icon
                         Text("Home")
+                            
                     }
                 
                 // 2. Notifications Tab
                 NotificationsView()
                     .tabItem {
-                        Image(systemName: "bell.fill") // Bell icon
+                        Image(systemName: "bell") // Bell icon
+                            
                         Text("Notifications")
                     }
                 
                 // 3. Job Post Tab
                 JobPostView()
                     .tabItem {
-                        Image(systemName: "plus.circle.fill") // Plus circle icon
+                        Image(systemName: "plus.circle") // Plus circle icon
                         Text("Post Job")
                     }
                 
                 // 4. Chat Tab
                 ChatView()
                     .tabItem {
-                        Image(systemName: "message.fill") // Chat bubble icon
+                        Image(systemName: "message") // Chat bubble icon
                         Text("Chat")
                     }
                 
                 // 5. Profile Tab
                 MyProfileView()
                     .tabItem {
-                        Image(systemName: "person.fill") // Human icon
+                        Image(systemName: "person") // Human icon
                         Text("Profile")
                     }
             }
+            .tint(.green)
             
             
             if isDrawerOpen {
@@ -63,7 +68,7 @@ struct Navigations: View {
                 // Drawer View
                 HStack {
                     DrawerView()
-                        .frame(width: UIScreen.main.bounds.width * 0.7) // 70% of screen
+                        .frame(width: UIScreen.main.bounds.width * 0.8) // 70% of screen
                         .transition(.move(edge: .leading))
                     Spacer()
                 }
