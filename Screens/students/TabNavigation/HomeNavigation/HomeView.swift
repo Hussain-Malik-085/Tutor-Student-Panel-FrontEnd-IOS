@@ -22,14 +22,13 @@ struct HomeView: View {
     var body: some View {
         NavigationView {
             VStack(alignment: .leading) {
-                
-                // ✅ Tutors count (fixed at top, not scrolling)
+                // Tutors count (fixed at top, not scrolling)
                 Text("\(teachers.count) Tutors Available")
                     .font(.caption)
                     .padding(.leading)
                     .padding(.top, 8)
                 
-                // ✅ Scroll starts from here
+                // Scroll starts from here
                 ScrollView {
                     if isLoading {
                         ProgressView("Loading teachers...")
@@ -40,9 +39,9 @@ struct HomeView: View {
                             ForEach(teachers) { teacher in
                                 NavigationLink(destination: TeacherProfileView(teacher: teacher)) {
                                     TeacherCardView(teacher: teacher)
-                                        .contentShape(Rectangle()) // ✅ pura card tappable ho jaye
+                                        .contentShape(Rectangle())
                                 }
-                                .buttonStyle(PlainButtonStyle()) // ✅ default blue highlight hata dega
+                                .buttonStyle(PlainButtonStyle())
                             }
                         }
                         .padding(.top)
@@ -63,10 +62,11 @@ struct HomeView: View {
                     }) {
                         Image(systemName: "person.crop.circle")
                             .font(.title)
-                            .foregroundColor(.green) 
+                            .foregroundColor(.green)
                     }
                 }
             }
+            .navigationBarBackButtonHidden(true) // ✅ Ensure back button is hidden
             .onAppear {
                 fetchTeachers()
             }

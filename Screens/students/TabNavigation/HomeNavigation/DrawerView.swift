@@ -55,6 +55,7 @@ struct DrawerView: View {
             }
             .padding(.bottom, 30)
         }
+        .navigationBarBackButtonHidden(true)
         .padding(.horizontal, 20)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.white)

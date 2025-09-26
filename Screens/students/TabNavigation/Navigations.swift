@@ -32,11 +32,13 @@ struct Navigations: View {
                     }
                 
                 // 3. Job Post Tab
-                JobPostView()
+                JobPostTitle1()
                     .tabItem {
-                        Image(systemName: "plus.circle") // Plus circle icon
+                        Image(systemName: "plus.circle.fill")
                         Text("Post Job")
                     }
+
+
                 
                 // 4. Chat Tab
                 ChatView()
@@ -74,6 +76,7 @@ struct Navigations: View {
                 }
                 .edgesIgnoringSafeArea(.all)
             }}
+        .navigationBarBackButtonHidden(true)
         
     }
 }
